@@ -67,8 +67,8 @@ class Project(models.Model):
         help_text=_("Used formatting for text file"),
     )
 
-    # @todo make dependencies version dependent
-    dependencies = models.ManyToManyField(
+    # @todo this is deprecated?
+    dependencies = models.ManyToManyField(  # type: ignore
         "Project",
         related_name="dependents",
         blank=True,

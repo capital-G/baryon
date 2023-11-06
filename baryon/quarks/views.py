@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 from django.db.models import Q
 from django.db.models.query import QuerySet
@@ -33,13 +33,13 @@ class ClassesListView(ListView):
     model = ProjectClass
     context_object_name = "classes"
 
-    def get_template_names(self) -> str:
+    def get_template_names(self) -> List[str]:
         if self.request.htmx:  # type: ignore
-            return "partials/class-list.html"
-        return "classes.html"
+            return ["partials/class-list.html"]
+        return ["classes.html"]
 
     def get_queryset(self) -> QuerySet[ProjectClass]:
-        qs = super().get_queryset()
+        qs: QuerySet[ProjectClass] = super().get_queryset()  # type: ignore
         # qs = qs.filter(is_extension=False)
         if search_term := self.request.GET.get("search"):
             qs = qs.filter(name__icontains=search_term)
@@ -51,13 +51,13 @@ class ProjectListView(ListView):
     model = Project
     context_object_name = "projects"
 
-    def get_template_names(self) -> str:
+    def get_template_names(self) -> List[str]:
         if self.request.htmx:  # type: ignore
-            return "partials/projects-list.html"
-        return "projects.html"
+            return ["partials/projects-list.html"]
+        return ["projects.html"]
 
     def get_queryset(self) -> QuerySet[Project]:
-        qs = super().get_queryset()
+        qs: QuerySet[Project] = super().get_queryset()  # type: ignore
         if search_term := self.request.GET.get("search"):
             qs = qs.filter(
                 Q(name__icontains=search_term)
