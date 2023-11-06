@@ -11,8 +11,7 @@ if os.environ.get("BARYON_SECRET_KEY") is None:
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "backend",
+    "baryon.supercollider.online",
 ]
 
 DATABASES = {
