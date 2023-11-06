@@ -1,5 +1,10 @@
 name: mypy
 
+permissions:
+    contents: read
+    checks: write
+    id-token: write
+
 on:
     pull_request:
     push:
