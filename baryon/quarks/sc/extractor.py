@@ -206,8 +206,13 @@ class ProjectRepo:
         try:
             with readme_file_path.open("rb") as f:
                 file_content = f.read()
-                encodings = chardet.detect(file_content)
-                text = file_content.decode(encoding=encodings["encoding"] or "utf-8")
+                try:
+                    text = file_content.decode()
+                except UnicodeDecodeError:
+                    encodings = chardet.detect(file_content)
+                    text = file_content.decode(
+                        encoding=encodings["encoding"] or "utf-8"
+                    )
                 return Readme(
                     file_path=readme_file_path,
                     formatting=readme_type,
