@@ -5,10 +5,14 @@
         <title>{% block title %}Baryon{% endblock %}</title>
 
         <meta charset="UTF-8">
-        <meta name="description" content="Package index for SuperCollider Quarks">
         <meta name="keywords" content="SuperColider, PackageIndex, Quarks">
         <meta name="author" content="Baryon">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <meta property="og:title" content="{% block og_title %}Baryon{% endblock %}" />
+        <meta property="og:description" content="{% block description %}Package index for SuperCollider Quarks{% endblock %}">
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="{{request.scheme}}://{{request.META.HTTP_HOST}}{% static 'logo.png' %}" />
 
         <link rel="icon" type="image/svg+xml" href="{% static 'logo.svg' %}">
 
