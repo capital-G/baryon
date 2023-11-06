@@ -5,6 +5,8 @@ baryon/sc_docs
 baryon/media
 baryon/static_collected/
 
+baryon/.mypy.xml
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
