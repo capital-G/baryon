@@ -186,6 +186,7 @@ class ProjectRepo:
             ReadmeFormatting.MARKDOWN,
             ReadmeFormatting.RST,
             ReadmeFormatting.RAW,
+            ReadmeFormatting.TXT,
         ]:
             # glob is case sensitive (future self: python 3.12 fixes this)
             # therefore we use walk (Path.walk is also introduced in 3.12)
