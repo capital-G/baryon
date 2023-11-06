@@ -2,6 +2,7 @@ import asyncio
 from pathlib import Path
 
 from django.core.management.base import BaseCommand  # type: ignore
+
 from quarks.sc.scraper import ProjectRepo, ProjectScraper, ProjectType
 
 
