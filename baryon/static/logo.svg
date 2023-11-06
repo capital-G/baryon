@@ -1,0 +1,20 @@
+<svg width="1000" height="1000"
+    xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:black;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:white;stop-opacity:1" />
+        </linearGradient>
+    </defs>
+
+    <rect x="50" y="50" width="1000" height="100" fill="url(#gradient)" />
+    <rect x="50" y="50" width="1300" height="540" fill="url(#gradient)" />
+
+    <rect x="180" y="50" width="1150" height="1000" fill="url(#gradient)" transform="skewX(45)" />
+    <rect x="370" y="0" width="350" height="1400" fill="url(#gradient)" transform="skewY(45)" />
+
+    <!-- "B" -->
+    <rect x="50" y="50" width="600" height="1000" fill="url(#gradient)" />
+    <rect x="200" y="150" width="350" height="300" fill="url(#gradient)" />
+    <rect x="200" y="600" width="350" height="300" fill="url(#gradient)" />
+</svg>

@@ -3,11 +3,14 @@
 <html lang="en">
     <head>
         <title>{% block title %}Baryon{% endblock %}</title>
+
         <meta charset="UTF-8">
         <meta name="description" content="Package index for SuperCollider Quarks">
         <meta name="keywords" content="SuperColider, PackageIndex, Quarks">
         <meta name="author" content="Baryon">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link rel="icon" type="image/svg+xml" href="{% static 'logo.svg' %}">
 
         <script src="https://unpkg.com/htmx.org@1.9.6"></script>
         {% django_htmx_script %}
