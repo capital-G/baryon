@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="content-top">
+    <h1>About</h1>
+</div>
+
+<div class="content-top">
+    A Baryon is a type of subatomic particle that is composed of at least three quarks and is also the name of the package index for SuperCollider extensions - also called Quarks.
+    <br/>
+    This website was programed with the goal to obtain a better overwiew of the existing quarks by analyzing them (e.g. extracting their classes) as well as rendering the documentation for each quark, and maybe provide a more stable API for package managing in the future.
+    <br/>
+    <br/>
+    The source code of this website is developed at GitHub, feel free to contribute or make a feature request if something is missing or not working.
+</div>
+
+<div class="content-top">
+    <h1>FAQ</h1>
+</div>
+
+<div class="class slot big-slot">
+    <div class="slot-wrapper">
+        <div class="slot-header">
+            <h2>What are Quarks?</h2>
+        </div>
+        <div class="slot-content">
+            <div class="text">
+            Quarks are packages of SuperCollider code containing classes, extension methods, documentation and server UGen plugins. The Quarks class manages downloading these packages and installing or uninstalling them.
+            <br/><br/>
+            For more information read the official documentation at <a href="https://docs.supercollider.online/Guides/UsingQuarks.html">https://docs.supercollider.online/Guides/UsingQuarks.html</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="class slot big-slot">
+    <div class="slot-wrapper">
+        <div class="slot-header">
+            <h2>What are extensions?</h2>
+        </div>
+        <div class="slot-content">
+            Where Quarks are coded within <i>sclang</i>, the programming language of SuperCollider, extensions are coded in C++ and aim to extend either the server through additional <a href="https://docs.supercollider.online/Guides/UGens-and-Synths.html">UGens</a> or extension of the functionality of sclang.
+            While Quarks can be managed within sclang itself, plugins and extensions need manual steps for installation and there is no complete index of all available extensions yet.
+            <br/><br/>
+            A good starting point are the <a href="https://supercollider.github.io/sc3-plugins/">sc3-plugins</a>
+        </div>
+    </div>
+</div>
+
+<div class="class slot big-slot">
+    <div class="slot-wrapper">
+        <div class="slot-header">
+            <h2>How should I manage Quarks?</h2>
+        </div>
+        <div class="slot-content">
+            Installing too many Quarks at once is not a good idea as they can easily create conflicts due to overlapping names and methods, therefore it is recommended to create multiple environments which allows to control which Quarks are loaded.
+            <br/><br/>
+            The documentation has a <a href="https://docs.supercollider.online/Classes/LanguageConfig.html">sparse guide</a>, but this can be more easily managed by opening the Prefernces of the IDE, and navigating to the Interpreter and take a look at the Interpreter Options.
+        </div>
+    </div>
+</div>
+
+<div class="class slot big-slot">
+    <div class="slot-wrapper">
+        <div class="slot-header">
+            <h2>I get an error message while installing a quark</h2>
+        </div>
+        <div class="slot-content">
+            First, verify that you have git installed, check out for example <a href="https://github.com/git-guides/install-git">this guide</a>.
+            <br/><br/>
+            If this does not solve the problem, visit <a href="https://scsynth.org">scsynth.org</a> and create a thread with as much information as possible.
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

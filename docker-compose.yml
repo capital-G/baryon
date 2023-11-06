@@ -1,0 +1,46 @@
+version: '3.9'
+
+volumes:
+  db:
+  static:
+  media:
+
+services:
+  database:
+    image: amd64/postgres:14.5-alpine
+    platform: linux/amd64
+    env_file:
+      - vars.env
+      - .secrets.env
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    platform: linux/amd64
+    env_file:
+      - vars.env
+      - .secrets.env
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - static:/app/static_collected:rw
+    #   - ./data:/data
+      - media:/app/media:rw
+
+  nginx:
+    image: nginx:1.23-alpine
+    volumes:
+      - ./nginx.deploy.conf:/etc/nginx/conf.d/default.conf
+      - static:/static/:ro
+      - media:/app/media:ro
+    ports:
+      - 8080:80
+    depends_on:
+      - backend

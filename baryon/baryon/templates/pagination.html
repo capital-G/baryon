@@ -1,0 +1,30 @@
+{% if page_obj %}
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <p hx-get="?page=1">first</p>
+            <p hx-get="?page={{ page_obj.previous_page_number }}">&laquo;</p>
+        {% else %}
+            <p></p>
+            <p></p>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <p hx-get="?page={{ page_obj.next_page_number }}" hx-on::after-request="scrollToTop()">&raquo;</p>
+            <p hx-get="?page={{ page_obj.paginator.num_pages }}">last</p>
+        {% else %}
+            <p></p>
+            <p></p>
+        {% endif %}
+    </span>
+    <script>
+        function scrollToTop() {
+            console.log("Hey");
+        };
+    </script>
+</div>
+{% endif %}

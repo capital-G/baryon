@@ -1,0 +1,43 @@
+{% if projects %}
+        {% for project in projects %}
+            <div class="project slot big-slot right-panel">
+                <div class="slot-wrapper">
+                    <div class="slot-header">
+                        <a href="{% url "project" name=project.name %}" class="slot-title">{{project.name}}</a>
+                    </div>
+                    <div class="slot-content">
+                        {{project.quark_info.summary}}
+                    </div>
+                </div>
+                <div class="slot-wrapper-right">
+                    <div class="info-table">
+                        <div>Since</div>
+                        <div>{{project.first_commit | date:"Y-m-d"}}</div>
+                        <div>Last update</div>
+                        <div>{{project.latest_commit | date:"Y-m-d"}}</div>
+                        <div># Classes</div>
+                        <div>{{project.classes.count }}</div>
+                        <div>Docs</div>
+                        <div>
+                            {% if project.docs.count > 0 %}
+                                &check;
+                            {% else %}
+                                &cross;
+                            {% endif %}
+                        </div>
+                        <div>Latest version</div>
+                        {% if project.versions.first is None %}
+                            <div></div>
+                        {% else %}
+                            <div>{{project.versions.first}}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    <div hx-target="#projects-list">
+        {% include "pagination.html" %}
+    </div>
+{% else %}
+    <p>Found no {{project_type}}</p>
+{% endif %}

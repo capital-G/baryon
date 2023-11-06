@@ -1,0 +1,22 @@
+{% if versions %}
+        {% for version in versions %}
+            <div class="class slot big-slot no-right-panel">
+                <div class="slot-wrapper">
+                    <div class="slot-header">
+                        {{ version.version_name }}
+                    </div>
+                    <div class="slot-content class">
+                        <div>Date</div>
+                        <div>{{version.release_date | date:"Y-m-d" }}</div>
+                        <div>Git hash</div>
+                        <div><code>{{version.git_hash}}</code></div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    <div hx-target="#classes-list">
+        {% include "pagination.html" %}
+    </div>
+{% else %}
+    <p>Found no versions tagged via git</p>
+{% endif %}

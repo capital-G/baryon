@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load markup_tags %}
+
+{% block content %}
+
+<div class="project" x-data="{ activeTab:  'info' }">
+    <div id="project-header" class="content-top">
+        <h1>{{project.name}}</h1>
+
+        <div class="summary">
+            {{project.quark_info.summary}}
+        </div>
+    </div>
+
+    <div class="tab tab-buttons">
+        <label @click="activeTab = 'info'" class="tab-control"
+            :class="{ 'active': activeTab === 'info' }">Readme</label>
+        <label @click="activeTab = 'classes'" class="tab-control"
+            :class="{ 'active': activeTab === 'classes'}">Classes</label>
+        <label @click="activeTab = 'docs'" class="tab-control"
+            :class="{ 'active': activeTab === 'docs'}">Documentation</label>
+        <label @click="activeTab = 'versions'" class="tab-control"
+            :class="{ 'active': activeTab === 'versions'}">Versions</label>
+    </div>
+
+    <div x-cloak class="project-content">
+        <div class="tab-content">
+            <div class="tab-panel" :class="{ 'active': activeTab === 'info' }"
+                x-show.transition.in.opacity.duration.600="activeTab === 'info'">
+                {% if project.project_help_formatting == 'md' %}
+                    {{ project.project_help | apply_markup:"markdown"}}
+                {% elif project.project_help_formatting == 'rst' %}
+                    {{ project.project_help | apply_markup:"restructuredtext"}}
+                {% else %}
+                <pre>
+                    {{project.project_help}}
+                </pre>
+                {% endif %}
+                {% if project.project_help == '' %}
+                    Project has no <code>README</code> file.
+                {% endif %}
+            </div>
+            <div class="tab-panel" :class="{ 'active': activeTab === 'classes' }"
+                x-show.transition.in.opacity.duration.600="activeTab === 'classes'">
+                {% include "partials/class-list.html" with classes=project.classes.all %}
+            </div>
+            <div class="tab-panel" :class="{ 'active': activeTab === 'docs' }"
+                x-show.transition.in.opacity.duration.600="activeTab === 'docs'">
+                {% include "partials/docs-list.html" with docs=project.docs.all %}
+            </div>
+            <div class="tab-panel" :class="{ 'active': activeTab === 'versions' }"
+                x-show.transition.in.opacity.duration.600="activeTab === 'versions'">
+                {% include "partials/version-list.html" with versions=project.versions.all %}
+            </div>
+        </div>
+
+        <div class="project-quark-info">
+            <h3>Installation</h3>
+            <button class="installation-code" onclick="copyToClipboard()">
+                <span id="installation-code-text">
+Quarks.install("{{project.git_url}}");
+thisProcess.recompile;
+                </span>
+            </button>
+
+            <script>
+                // from https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
+                function copyToClipboard() {
+                    var installationCode = document.getElementById("installation-code-text");
+                    navigator.clipboard.writeText(`(\n${installationCode.textContent.trim()}\n)`);
+                    alert("Copied installation code to clipboard");
+                }
+            </script>
+
+            <h3>Repository</h3>
+            <div class="quark-table">
+                <p>URL</p>
+                <p><a href="{{project.git_url}}">{{project.git_url}}</a></p>
+
+                <p>Since</p>
+                <p>{{ project.first_commit | date:"Y-m-d" }}</p>
+
+                <p>Last update</p>
+                <p>{{ project.latest_commit | date:"Y-m-d" }}</p>
+
+                <p>Current version</p>
+                <p>
+                {% if project.versions.first is None %}
+                    {{ project.quark_info.version }}
+                {% else %}
+                    {{ project.versions.first }}
+                {% endif %}
+                </p>
+            </div>
+
+            <h3>Quark info</h3>
+            <div class="quark-table">
+                {% for key, value in project.quark_info.items %}
+                    <p>{{key}}</p>
+                    <p>{{value}}</p>
+                {% endfor %}
+            </div>
+
+            <h3 title="These are just guesses and can be incomplete or wrong">Possible dependcies</h3>
+            {% for dependency in project.get_dependencies %}
+                <p><a href="{% url 'project' name=dependency.name %}">{{dependency.name}}</a></p>
+            {% empty %}
+                <p></p>
+            {% endfor %}
+
+            <h3 title="These are just guesses and can be incomplete or wrong">Possible dependants</h3>
+            {% for dependent in project.get_dependents %}
+                <p><a href="{% url 'project' name=dependent.name %}">{{dependent.name}}</a></p>
+            {% empty %}
+                <p></p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

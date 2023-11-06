@@ -1,0 +1,25 @@
+{% extends "base.html" %} {% block content %}
+
+<div id="welcome-splash" class="content-top">
+    <h1 style="padding-bottom: 20px;">Welcome to <span class="highlight">Baryon</span></h1>
+    <p>Baryon is a package index for <a href="https://supercollider.github.io">SuperCollider</a> quarks and extensions.</p>
+</div>
+
+<div class="quarks-list-wrapper">
+  <div class="small-quark-list">
+    <span>New quarks</span>
+    {% include 'partials/small-projects-list.html' with projects=latest_quarks %}
+  </div>
+
+  <div class="small-quark-list">
+    <span>Latest updates</span>
+    {% include 'partials/small-projects-list.html' with projects=latest_updates %}
+  </div>
+
+  <div class="small-quark-list">
+    <span>Random quarks</span>
+    {% include 'partials/small-projects-list.html' with projects=random_quarks %}
+  </div>
+</div>
+
+{% endblock content %}

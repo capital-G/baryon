@@ -1,0 +1,6 @@
+baryon/repos/
+baryon/media/sc_docs/
+baryon/db.sqlite3
+venv/
+.mypy_cache/
+.vscode/

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div id="search-header" class="content-top">
+        <h1>{{project_type}}</h1>
+
+        <input
+            class="search"
+            placeholder="Search..."
+            name="search"
+            hx-get=""
+            hx-trigger="keyup changed delay:0.2s"
+            hx-target="#projects-list"
+        />
+    </div>
+
+    <div id="projects-list">
+        {% include "partials/projects-list.html" %}
+    </div>
+
+    <script>
+        // inject the search term for the pagination request
+        document.body.addEventListener('htmx:configRequest', function (event) {
+            event.detail.parameters['search'] = document.querySelector('input[name="search"]').value;
+        });
+    </script>
+{% endblock content %}

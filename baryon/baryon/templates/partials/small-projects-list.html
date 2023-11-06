@@ -1,0 +1,16 @@
+{% if projects %}
+        {% for project in projects %}
+            <div class="project slot small-slot">
+                <div class="slot-wrapper">
+                    <div class="slot-header">
+                        <a href="{% url "project" name=project.name %}" class="slot-title">{{project.name}}</a>
+                    </div>
+                    <div class="slot-content light-text">
+                        Last update: {{project.latest_commit | date:"Y-m-d"}}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+{% else %}
+    <p>Found no {{project_type}}</p>
+{% endif %}

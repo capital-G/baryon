@@ -1,0 +1,12 @@
+django==4.2.6
+djangorestframework==3.14.0
+drf-yasg==1.21.7
+django-filter==23.3
+aiohttp==3.8.6
+Pygments==2.16.1
+django-stubs[compatible-mypy]==4.2.6
+chardet==5.2.0
+django-htmx==1.17.0
+django-markup[all_filter_dependencies]==1.8.1
+uvicorn==0.24.0
+psycopg2-binary==2.9.9

@@ -1,0 +1,25 @@
+{% load static django_htmx %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Baryon</title>
+        <meta charset="UTF-8">
+
+        <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+        {% django_htmx_script %}
+
+        <script src="//unpkg.com/alpinejs" defer></script>
+        <link rel="stylesheet" href="{% static "style.css" %}">
+    </head>
+
+    <body>
+        {% include "header.html" %}
+
+        <div class="content">
+            {% block content %}
+            {% endblock content %}
+        </div>
+
+        {% include "footer.html" %}
+    </body>
+</html>

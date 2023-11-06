@@ -1,0 +1,36 @@
+{% if classes %}
+        {% for class in classes %}
+            <div class="class slot big-slot right-panel">
+                <div class="slot-wrapper">
+                    <div class="slot-header">
+                        {{ class.name }}
+                    </div>
+                    <div class="slot-content class">
+                        <div>Project</div>
+                        <div><a href="{% url 'project' name=class.project.name %}">{{class.name}}</a></div>
+                        <div>Source file</div>
+                        <div>{{class.file_path}}</div>
+                    </div>
+                </div>
+                <div class="slot-wrapper-right">
+                    <div class="info-table">
+                        <div>Extension</div>
+                        <div>
+                            {% if class.is_extension %}
+                                &check;
+                            {% else %}
+                                &cross;
+                            {% endif %}
+                        </div>
+                        <div>SuperClass:</div>
+                        <div>{{class.super_class|default:"&cross;"}}</div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    <div hx-target="#classes-list">
+        {% include "pagination.html" %}
+    </div>
+{% else %}
+    <p>Found no classes</p>
+{% endif %}

@@ -1,0 +1,22 @@
+{% if docs %}
+        {% for doc in docs %}
+            <div class="class slot big-slot no-right-panel">
+                <div class="slot-wrapper">
+                    <div class="slot-header">
+                        <a href="{{ doc.html_file.url }}" target="_blank">{{ doc.source_path }}</a>
+                    </div>
+                    <div class="slot-content class">
+                        <div>Project</div>
+                        <div><a href="{% url 'project' name=doc.project.name %}">{{doc.project.name}}</a></div>
+                        <div>Source file</div>
+                        <div>{{doc.source_path}}</div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    <div hx-target="#classes-list">
+        {% include "pagination.html" %}
+    </div>
+{% else %}
+    <p>Found no docs</p>
+{% endif %}
