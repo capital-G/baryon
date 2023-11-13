@@ -1,0 +1,27 @@
+name: deploy
+
+on:
+  workflow_run:
+    workflows: ["pre-commit", "mypy", "test_scraping_run"]
+    types:
+      - completed
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    concurrency: "deployment"
+    steps:
+      - name: Deploy website
+        uses: appleboy/ssh-action@master
+        with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            script: |
+                cd baryon
+                docker compose down
+                git reset --hard
+                git pull origin main
+                make docker-prod
