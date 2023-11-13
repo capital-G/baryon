@@ -1,0 +1,13 @@
+[Unit]
+Description=Baryon Scraper
+After=docker.service
+
+[Service]
+User=baryon
+WorkingDirectory=/home/baryon/baryon
+ExecStart=/usr/bin/docker compose exec backend python manage.py scrape_quarks
+StandardOutput=append:/home/baryon/logs/scrape-quarks-log.log
+StandardError=append:/home/baryon/logs/scrape-quarks-log-error.log
+
+[Install]
+WantedBy=default.target

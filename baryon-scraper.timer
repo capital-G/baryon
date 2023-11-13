@@ -1,0 +1,9 @@
+[Unit]
+Description=Scrape for new quarks in Baryon.
+
+[Timer]
+OnCalendar=05:00
+Unit=baryon-scraper.service
+
+[Install]
+WantedBy=timers.target
