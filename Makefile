@@ -20,3 +20,8 @@ test-types: venv virtualenv
 		cd baryon; \
 		mypy . \
 	)
+
+deploy-prod:
+	docker compose stop
+	docker compose build
+	docker compose up -d
