@@ -178,6 +178,23 @@ class ProjectRepo:
         logger.debug(f"Pull repository {self}")
         await self.git("pull")
 
+    @staticmethod
+    def _get_file_contents(file_path: Path) -> str:
+        # a helper method which first tries to read the file in utf-8
+        # and otherwise tries to guess the encoding via chardet and
+        # replace any errors instead of failing
+        with file_path.open("rb") as f:
+            file_content = f.read()
+            try:
+                text = file_content.decode()
+            except UnicodeDecodeError as e:
+                logger.error(f"{file_path} does not seem to be UTF-8 encoded: {e}")
+                encodings = chardet.detect(file_content)
+                text = file_content.decode(
+                    encoding=encodings["encoding"] or "utf-8", errors="replace"
+                )
+        return text
+
     def get_readme(self) -> Optional[Readme]:
         readme_candidates: List[Path] = []
         readme_type: ReadmeFormatting = ReadmeFormatting.MARKDOWN
@@ -204,15 +221,11 @@ class ProjectRepo:
 
         readme_file_path = readme_candidates[0]
         try:
-            with readme_file_path.open("rb") as f:
-                file_content = f.read()
-                encodings = chardet.detect(file_content)
-                text = file_content.decode(encoding=encodings["encoding"] or "utf-8")
-                return Readme(
-                    file_path=readme_file_path,
-                    formatting=readme_type,
-                    text=text,
-                )
+            return Readme(
+                file_path=readme_file_path,
+                formatting=readme_type,
+                text=self._get_file_contents(readme_file_path),
+            )
         except Exception as e:
             logger.error(f"Failed to fetch README for {self}: {e}")
             return None
@@ -340,11 +353,7 @@ class ProjectRepo:
             text: str
             sc_file_path = self.repo_path.joinpath(sc_file)
 
-            # @todo use chardet to guess encoding
-            with open(sc_file_path, "rb") as f:
-                file_content = f.read()
-                encodings = chardet.detect(file_content)
-                text = file_content.decode(encoding=encodings["encoding"] or "utf-8")
+            text = self._get_file_contents(sc_file_path)
             for match in self.SCLANG_CLASS_DECLARATION_REGEX.finditer(text):
                 match_dict = match.groupdict()
                 sclang_classes.append(
