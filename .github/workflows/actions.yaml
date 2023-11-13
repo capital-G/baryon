@@ -1,0 +1,71 @@
+name: ci
+
+permissions:
+    pull-requests: write
+    issues: write
+    repository-projects: write
+    contents: write
+
+on:
+    pull_request:
+    push:
+        branches: [main]
+
+jobs:
+    mypy:
+        runs-on: ubuntu-latest
+        name: mypy
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-python@v4
+              with:
+                python-version: '3.10'
+                cache: 'pip'
+            - run: pip install -r requirements.txt
+            - run: mypy .
+              working-directory: ./baryon
+            - name: Publish Test Report
+              uses: mikepenz/action-junit-report@v4
+              if: success() || failure()
+              with:
+                report_paths: './baryon/.mypy.xml'
+
+    pre-commit:
+        runs-on: ubuntu-latest
+        name: pre-commit
+        steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-python@v3
+        - uses: pre-commit/action@v3.0.0
+
+    test_scraping:
+        runs-on: ubuntu-latest
+        name: test_scraping
+        steps:
+            - uses: actions/checkout@v3
+            - name: Cache Docker images.
+              uses: ScribeMD/docker-cache@0.3.6
+              with:
+                key: docker-${{ runner.os }}-${{ hashFiles('Dockerfile') }}
+            - run: docker build -t baryon .
+            - run: docker run --env DJANGO_SETTINGS_MODULE=baryon.settings.dev baryon /bin/bash -c "python manage.py migrate && python manage.py scrape_quarks"
+
+    deploy:
+        if: success() && github.ref == 'refs/heads/main' # only deploy main
+        needs: ["mypy", "pre-commit", "test_scraping"]
+        name: Deploy dev
+        runs-on: ubuntu-latest
+        concurrency: "deployment"
+        steps:
+            - name: Deploy environment
+              uses: appleboy/ssh-action@master
+              with:
+                host: ${{ secrets.HOST }}
+                username: ${{ secrets.USER }}
+                key: ${{ secrets.KEY }}
+                script: |
+                    cd baryon
+                    docker compose down
+                    git reset --hard
+                    git pull origin main
+                    make deploy-prod
