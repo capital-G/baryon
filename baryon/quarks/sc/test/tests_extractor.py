@@ -65,3 +65,36 @@ class ExtractorTestCase(TestCase):
 
         finally:
             os.remove(html_target)
+
+    def test_get_relative_path_str(self):
+        self.assertEqual(
+            "./bar.html",
+            ProjectRepo._get_relative_path_str(
+                path=Path("/hello/world/bar.html"),
+                relative_to=Path("/hello/world"),
+            ),
+        )
+
+        self.assertEqual(
+            "../bar.html",
+            ProjectRepo._get_relative_path_str(
+                path=Path("/hello/bar.html"),
+                relative_to=Path("/hello/world"),
+            ),
+        )
+
+        self.assertEqual(
+            "../new/bar.html",
+            ProjectRepo._get_relative_path_str(
+                path=Path("/hello/new/bar.html"),
+                relative_to=Path("/hello/world"),
+            ),
+        )
+
+        with self.assertRaises(Exception):
+            ProjectRepo._get_relative_path_str(
+                path=Path("/no/thing/in/common.html"),
+                relative_to=Path(
+                    "/too/far/apart/will/not/work/because/of/max/recursion"
+                ),
+            )

@@ -369,11 +369,12 @@ class ProjectRepo:
 
         return help_files
 
-    def _get_relative_path_str(self, path: Path, relative_to: Path) -> str:
+    @staticmethod
+    def _get_relative_path_str(path: Path, relative_to: Path) -> str:
         # this is necessary b/c path.relative_to() can't go up directories
         # so it is necessary to iterate over paths manually
         try:
-            return str(path.relative_to(relative_to))
+            return f"./{path.relative_to(relative_to)}"
         except ValueError:
             pass
         num_iters = 0
@@ -469,7 +470,7 @@ class ProjectRepo:
                                     logger.debug(
                                         f"Rewrite link {url} to {relative_url} for {help_file.html_path}"
                                     )
-                                    url = f"./{relative_url}"
+                                    url = relative_url
                             else:
                                 url = url.replace(relative_path, online_help_url)
                             tag.attrib["href"] = url
