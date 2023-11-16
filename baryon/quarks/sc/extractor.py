@@ -369,6 +369,25 @@ class ProjectRepo:
 
         return help_files
 
+    def _get_relative_path_str(self, path: Path, relative_to: Path) -> str:
+        # this is necessary b/c path.relative_to() can't go up directories
+        # so it is necessary to iterate over paths manually
+        try:
+            return str(path.relative_to(relative_to))
+        except ValueError:
+            pass
+        num_iters = 0
+        relative_path = "../"
+        while num_iters < 4:
+            try:
+                relative_to = relative_to.joinpath("..").resolve()
+                return f"{relative_path}{path.relative_to(relative_to)}"
+            except ValueError:
+                # go up one level
+                relative_path = f"{relative_path}../"
+                num_iters += 1
+        raise Exception()
+
     def build_repo_url_for_file(
         self, file_path: Path, default_branch: Optional[str] = None
     ) -> str:
@@ -443,10 +462,9 @@ class ProjectRepo:
                                     .replace(".html", "")
                                 )
                                 if url.endswith(help_name):
-                                    relative_url = (
-                                        quark_help_file.html_path.relative_to(
-                                            help_file.html_path.parent
-                                        )
+                                    relative_url = self._get_relative_path_str(
+                                        path=quark_help_file.html_path,
+                                        relative_to=help_file.html_path.parent,
                                     )
                                     logger.debug(
                                         f"Rewrite link {url} to {relative_url} for {help_file.html_path}"
@@ -530,8 +548,8 @@ async def foo():
     # print(await project.extract_quark_info())
     # classes = project.get_classes()
     # # print("Found classes", [x.name for x in project.get_classes()])
-    # docs = await project.build_docs()
-    # project.fix_doc_links(docs)
+    docs = await project.build_docs()
+    project.fix_doc_links(docs)
     print("foo")
 
 
