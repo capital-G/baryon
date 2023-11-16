@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional
 
 import chardet
 import pytz
+from lxml import etree
 
 logger = logging.getLogger(__name__)
 
@@ -83,10 +84,14 @@ class ProjectRepo:
         r"[\t\s]*(?<![A-za-z])(?P<class>[A-Z]+[A-Za-z0-9]*)[\.\(]", re.MULTILINE
     )
 
-    SCLANG_PATH = os.environ.get("SCLANG_PATH", "sclang")
+    GIT_DEFAULT_BRANCH_EXTRACTOR = re.compile(
+        r"HEAD branch: (?P<default_branch>.+)$", re.MULTILINE
+    )
 
     # attention - hardcoded path!
     SCDOC_TARGET_PATH = Path(__file__).parent.joinpath("../../media/sc_docs").resolve()
+
+    HTML_PARSER = etree.HTMLParser()
 
     def __init__(
         self,
@@ -95,12 +100,23 @@ class ProjectRepo:
         url: str,
         repo_path: Path,
         default_tag: Optional[str],
+        default_branch: str = "main",
+        sclang_path: Optional[str] = None,
     ) -> None:
         self.project_type = project_type
         self.name = name
         self.url = url
         self.repo_path = repo_path
         self.default_tag = default_tag
+        # pay attention - this is stateful :/
+        # needs a better pattern as this is needed to construct a URL
+        # to a given file
+        self.default_branch = default_branch
+
+        self.SCLANG_PATH = (
+            sclang_path if sclang_path else os.environ.get("SCLANG_PATH", "sclang")
+        )
+        assert self.SCLANG_PATH is not None
 
     @classmethod
     async def new_repo(cls, **kwargs):
@@ -116,6 +132,20 @@ class ProjectRepo:
         stdout, stderr = await git_process.communicate()
         # assert git_process.returncode == 0
         return stdout.decode()
+
+    async def get_default_branch(self) -> str:
+        remote_branches = await self.git("remote", "show", "origin")
+        branch_search = self.GIT_DEFAULT_BRANCH_EXTRACTOR.search(remote_branches)
+        if not branch_search:
+            logger.error(
+                f"Could not extract default remote branch from {self} - fall back on local branch"
+            )
+            self.default_branch = await self.git("symbolic-ref", "--short", "HEAD")
+        else:
+            self.default_branch = branch_search.group("default_branch")
+        logger.debug(f"Default branch for {self} is {self.default_branch}")
+
+        return self.default_branch
 
     async def get_git_tags(self) -> List[CommitInfo]:
         raw_tag_info = await self.git("show-ref", "--tags")
@@ -339,6 +369,104 @@ class ProjectRepo:
 
         return help_files
 
+    def build_repo_url_for_file(
+        self, file_path: Path, default_branch: Optional[str] = None
+    ) -> str:
+        # @todo make this static so it can be used by django to build URLs at runtime
+        # so they are not necessary to store in the database
+        base_url = self.url.split("@")[0]
+        if base_url.endswith(".git"):
+            base_url = base_url[: -len(".git")]
+        default_branch = default_branch if default_branch else self.default_branch
+        relative_file_path = file_path.relative_to(self.repo_path)
+        if "github.com" in base_url:
+            return f"{base_url}/blob/{default_branch}/{relative_file_path}"
+        elif "gitlab.com" in self.url.lower():
+            return f"{base_url}/-/blob/{default_branch}/{relative_file_path}"
+        logger.debug("Could not guess URL build pattern of {self} - use gitlab")
+        # gitlab as fallback because there are more self hosted gitlab instances than
+        # github instances
+        return f"{base_url}/-/blob/{default_branch}/{relative_file_path}"
+
+    def fix_doc_links(
+        self,
+        help_files: List[HelpFile],
+        online_help_url: str = "https://docs.supercollider.online",
+        relative_path: str = "./../..",
+    ):
+        """
+        All relative links within the help file should either link to other help files within the quark or
+        to the "official" online help.
+
+        The relative links start with "./../..".
+
+        .. todo::
+
+            Links to help file of other quarks are not supported for now.
+        """
+        # assumption: help files are only identified via their html file name within one quark
+        # the href misses the .html extension, therefore it is disregarded here as well
+        for help_file in help_files:
+            if not help_file.html_path:
+                continue
+            with help_file.html_path.open("rb") as f:
+                tree: etree._ElementTree = etree.parse(
+                    source=f, parser=self.HTML_PARSER
+                )
+
+                tag: etree._Element
+                for tag in tree.xpath(
+                    '//*[starts-with(@href, "./../../") or starts-with(@src, "./../../")]'
+                ):
+                    match tag.tag:
+                        # link -> stylesheet - use from online docs
+                        case "link":
+                            tag.attrib["href"] = tag.attrib.get("href", "").replace(
+                                relative_path, online_help_url
+                            )
+                        # script -> js scripts - use from online docs
+                        case "script":
+                            tag.attrib["src"] = tag.attrib.get("src", "").replace(
+                                relative_path, online_help_url
+                            )
+                        # a needs distinction
+                        case "a":
+                            # href target misses extensions .html
+                            url: str = tag.attrib.get("href", "")
+                            for quark_help_file in help_files:
+                                if not quark_help_file.html_path:
+                                    continue
+                                # help files are linked without .html
+                                help_name = (
+                                    str(quark_help_file.html_path.absolute())
+                                    .split("/")[-1]
+                                    .replace(".html", "")
+                                )
+                                if url.endswith(help_name):
+                                    relative_url = (
+                                        quark_help_file.html_path.relative_to(
+                                            help_file.html_path.parent
+                                        )
+                                    )
+                                    logger.debug(
+                                        f"Rewrite link {url} to {relative_url} for {help_file.html_path}"
+                                    )
+                                    url = f"./{relative_url}"
+                            else:
+                                url = url.replace(relative_path, online_help_url)
+                            tag.attrib["href"] = url
+
+                # replace link to schelp file
+                for tag in tree.xpath('//div[@class="doclink"]/a'):
+                    tag.attrib["href"] = self.build_repo_url_for_file(
+                        help_file.source_path
+                    )
+                    tag.text = str(help_file.source_path.relative_to(self.repo_path))  # type: ignore
+
+            # reopen as write only b/c of  lxml
+            with help_file.html_path.open("wb") as f:
+                tree.write(f, method="html")  # type: ignore
+
     def get_classes(self) -> List[SclangClass]:
         sclang_classes: List[SclangClass] = []
 
@@ -385,12 +513,14 @@ class ProjectRepo:
 async def foo():
     project = ProjectRepo(
         project_type=ProjectType.QUARK,
-        name="atk-sc3",
+        name="AlgaLib",
         url="https://github.com/vitreo12/AlgaLib.git",
         repo_path=Path("/Users/scheiba/github/sc-quarks/baryon/repos/AlgaLib"),
         default_tag=None,
+        sclang_path="/Applications/SuperCollider.app/Contents/MacOS/sclang",
     )
     await project.init_repo()
+    await project.get_default_branch()
 
     print(await project.get_first_commit())
 
@@ -401,6 +531,7 @@ async def foo():
     # classes = project.get_classes()
     # # print("Found classes", [x.name for x in project.get_classes()])
     # docs = await project.build_docs()
+    # project.fix_doc_links(docs)
     print("foo")
 
 
