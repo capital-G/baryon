@@ -85,6 +85,7 @@ class ProjectScraper:
             try:
                 await quark.init_repo()
                 await quark.update_repo()
+                await quark.get_default_branch()
 
                 first_commit = await quark.get_first_commit()
                 project.first_commit = first_commit.date
@@ -127,7 +128,10 @@ class ProjectScraper:
                     )
 
                 project.quark_info = await quark.extract_quark_info()
-                for doc in await quark.build_docs():
+
+                doc_files = await quark.build_docs()
+                quark.fix_doc_links(doc_files)
+                for doc in doc_files:
                     if doc.html_path is None:
                         continue
                     await ProjectDoc.objects.aupdate_or_create(

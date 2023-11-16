@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang='en'>
+
+<head>
+    <title>Fb1_ODE | SuperCollider 3.13.0 Help</title>
+    <link rel='stylesheet' href='./../../scdoc.css' type='text/css' />
+    <link rel='stylesheet' href='./../../codemirror.css' type='text/css' />
+    <link rel='stylesheet' href='./../../editor.css' type='text/css' />
+    <link rel='stylesheet' href='./../../frontend.css' type='text/css' />
+    <link rel='stylesheet' href='./../../custom.css' type='text/css' />
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
+    <script src='./../../lib/jquery.min.js'></script>
+    <script src='./../../lib/codemirror-5.39.2.min.js' type='text/javascript'></script>
+    <script src='./../../lib/codemirror-addon-simple-5.39.2.min.js' type='text/javascript'></script>
+    <script>
+        var helpRoot = './../..';
+        var scdoc_title = 'Fb1_ODE';
+        var scdoc_sc_version = '3.13.0';
+    </script>
+    <script src='./../../scdoc.js' type='text/javascript'></script>
+    <script src='./../../docmap.js' type='text/javascript'></script>
+</head>
+
+<body onload='fixTOC()'>
+    <div id='toc'>
+        <div id='toctitle'>Fb1_ODE:</div>
+        <span class='toc_search'>Filter: <input id='toc_search'></span>
+        <ul class='toc'>
+            <li class='toc1'><a href='#description'>Description</a></li>
+            <ul class='toc'>
+                <li class='toc2'><a href='#References'>References</a></li>
+                <ul class='toc'></ul>
+            </ul>
+            <li class='toc1'><a href='#classmethods'>Class methods</a></li>
+            <ul class='toc'>
+                <li class='toc3'><a href='#*new'>new</a> </li>
+                <li class='toc3'><a href='#*ar'>ar</a> </li>
+                <li class='toc3'><a href='#*kr'>kr</a> </li>
+            </ul>
+            <li class='toc1'><a href='#Examples%201:%20Proof%20of%20concept'>Examples 1: Proof of concept</a></li>
+            <ul class='toc'>
+                <li class='toc2'><a href='#Ex.%201a:%20The%20harmonic%20oscillator'>Ex. 1a: The harmonic oscillator</a>
+                </li>
+                <ul class='toc'></ul>
+                <li class='toc2'><a
+                        href='#Ex.%201b:%20Extending%20the%20harmonic%20oscillator%20to%20the%20mass-spring-damper%20model'>Ex.
+                        1b: Extending the harmonic oscillator to the mass-spring-damper model</a></li>
+                <ul class='toc'></ul>
+            </ul>
+        </ul>
+    </div>
+    <div id='menubar'></div>
+    <div class='contents'>
+        <div class='header'>
+            <div id='label'>
+                <span id='folder'>miSCellaneous_lib/Classes (extension)</span>
+                | <span id='categories'><a href='./../../Browse.html#Libraries'>Libraries</a>&#8201;&gt;&#8201;<a
+                        href='./../../Browse.html#Libraries>miSCellaneous'>miSCellaneous</a>&#8201;&gt;&#8201;<a
+                        href='./../../Browse.html#Libraries>miSCellaneous>Nonlinear'>Nonlinear</a></span>
+            </div>
+            <h1>Fb1_ODE<div class='extension-indicator-ctr'
+                    title='This help file originates from a third-party quark or plugin for SuperCollider.'><img
+                        class='extension-indicator-icon' alt='Extension' src='./../../images/plugin.png'><span
+                        class='extension-indicator-text'>Extension</span></div>
+            </h1>
+            <div id='summary'>general ordinary differential equation integrator pseudo ugen</div>
+        </div>
+        <div class='subheader'>
+            <div id='related'>See also: <a href="./../../Overviews/miSCellaneous">miSCellaneous</a>, <a
+                    href="./../../Guides/Introduction_to_miSCellaneous">Introduction_to_miSCellaneous</a>, <a
+                    href="./../../Classes/Fb1">Fb1</a>, <a href="./../../Classes/GFIS">GFIS</a>, <a
+                    href="./../../Classes/Fb1_ODEdef">Fb1_ODEdef</a>, <a href="./../../Classes/Fb1_ODE">Fb1_ODE</a>, <a
+                    href="./../../Classes/Fb1_ODEintdef">Fb1_ODEintdef</a>, <a
+                    href="./../../Classes/Fb1_MSD">Fb1_MSD</a>, <a href="./../../Classes/Fb1_SD">Fb1_SD</a>, <a
+                    href="./../../Classes/Fb1_Lorenz">Fb1_Lorenz</a>, <a href="./../../Classes/Fb1_Hopf">Fb1_Hopf</a>,
+                <a href="./../../Classes/Fb1_HopfA">Fb1_HopfA</a>, <a
+                    href="./../../Classes/Fb1_HopfAFDC">Fb1_HopfAFDC</a>, <a
+                    href="./../../Classes/Fb1_VanDerPol">Fb1_VanDerPol</a>, <a
+                    href="./../../Classes/Fb1_Duffing">Fb1_Duffing</a>
+            </div>
+        </div>
+        <h2><a class='anchor' name='description'>Description</a></h2>
+
+        <p>Pseudo ugen for integrating / audifying ordinary (systems of) differential equations with initial values in
+            realtime, based on the Fb1 single sample feedback class. It makes use of Fb1_ODEdef and Fb1_ODEintdef,
+            containers for ODEs and numerical solution methods, which provide an interface for adding new ODE systems or
+            integration methods interactively. There exists a huge number of ODE models in different areas, e.g. have a
+            look at the SIAM publication Exploring ODEs <a href="#[1]">[1]</a>, it approaches the topic from an
+            experimental point of view, which is quite related to the demands of practical audification / synthesis /
+            processing. And of course it's fun to define your own ODEs, see this help file and <a
+                href="./../../Classes/Fb1_ODEdef">Fb1_ODEdef</a>.
+
+        </p>
+    </div>
+
+    <div class='doclink'>helpfile source: <a
+            href='./JSONlib.html'>/tmp/tmpt889pv_abaryon_miSCellaneous_lib/miSCellaneous_lib/Classes/Fb1_ODE.schelp</a><br>link::miSCellaneous_lib/Classes/Fb1_ODE::<br>
+    </div>
+    </div>
+    <script src='./../../editor.js' type='text/javascript'></script>
+</body>
+
+</html>
