@@ -11,3 +11,4 @@ django-markup[all_filter_dependencies]==1.8.1
 uvicorn==0.24.0.post1
 psycopg2-binary==2.9.9
 lxml==4.9.3
+unittest-xml-reporting==3.2.0

@@ -4,8 +4,8 @@ baryon/repos
 baryon/sc_docs
 baryon/media
 baryon/static_collected/
-
 baryon/.mypy.xml
+baryon/.unit-tests.xml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

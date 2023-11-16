@@ -21,6 +21,12 @@ test-types: venv virtualenv
 		mypy . \
 	)
 
+test: venv virtualenv
+	. venv/bin/activate && (\
+		cd baryon; \
+		python manage.py test --settings=baryon.settings.test \
+	)
+
 deploy-prod:
 	docker compose stop
 	docker compose build
