@@ -61,7 +61,7 @@ jobs:
 
     deploy:
         if: success() && github.ref == 'refs/heads/main' # only deploy main
-        needs: ["mypy", "pre-commit", "test_scraping"]
+        needs: ["tests", "pre-commit", "test_scraping"]
         name: Deploy dev
         runs-on: ubuntu-latest
         concurrency: "deployment"
