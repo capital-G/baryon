@@ -3,6 +3,7 @@ from pathlib import Path
 
 from django.db import models
 from django.db.models import Q
+from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from .sc.extractor import ProjectRepo as Extractor
@@ -128,6 +129,9 @@ class Project(models.Model):
             relative_file_path=relative_file_path,
             default_branch=self.default_branch,
         )
+
+    def get_absolute_url(self):
+        return reverse("project", kwargs={"name": self.name})
 
     class Meta:
         ordering = ["name"]
@@ -280,6 +284,9 @@ class ProjectDoc(models.Model):
         return self.project._build_repo_url(
             relative_file_path=Path(self.source_path),
         )
+
+    def get_absolute_url(self):
+        return self.html_file.url
 
     class Meta:
         ordering = [

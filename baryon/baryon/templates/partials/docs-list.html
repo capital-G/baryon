@@ -3,11 +3,11 @@
             <div class="class slot big-slot no-right-panel">
                 <div class="slot-wrapper">
                     <div class="slot-header">
-                        <a href="{{ doc.html_file.url }}" target="_blank">{{ doc.source_path }}</a>
+                        <a href="{{ doc.get_absolute_url }}" target="_blank">{{ doc.source_path }}</a>
                     </div>
                     <div class="slot-content class">
                         <div>Project</div>
-                        <div><a href="{% url 'project' name=doc.project.name %}">{{doc.project.name}}</a></div>
+                        <div><a href="{{ doc.project.get_absolute_url }}">{{doc.project.name}}</a></div>
                         <div>Source file</div>
                         <div><a href="{{ doc.repo_url }}">{{doc.source_path}}</a></div>
                     </div>
