@@ -77,6 +77,12 @@ class Project(models.Model):
         blank=True,
     )
 
+    default_branch = models.CharField(
+        max_length=200,
+        # nowadays it is main but most quarks are a bit older
+        default="master",
+    )
+
     def get_dependencies(self) -> models.QuerySet["Project"]:
         dependencies = []
 
@@ -120,8 +126,7 @@ class Project(models.Model):
         return Extractor.build_repo_url_for_file(
             git_url=self.git_url,
             relative_file_path=relative_file_path,
-            # does this work?
-            default_branch="master",
+            default_branch=self.default_branch,
         )
 
     class Meta:
