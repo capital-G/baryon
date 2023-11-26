@@ -1,8 +1,11 @@
 import uuid
+from pathlib import Path
 
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext as _
+
+from .sc.extractor import ProjectRepo as Extractor
 
 
 class Project(models.Model):
@@ -113,6 +116,14 @@ class Project(models.Model):
         default=dict,
     )
 
+    def _build_repo_url(self, relative_file_path: Path) -> str:
+        return Extractor.build_repo_url_for_file(
+            git_url=self.git_url,
+            relative_file_path=relative_file_path,
+            # does this work?
+            default_branch="master",
+        )
+
     class Meta:
         ordering = ["name"]
 
@@ -210,6 +221,12 @@ class ProjectClass(models.Model):
         null=False, default=False, help_text=_("Is class extension")
     )
 
+    @property
+    def repo_url(self) -> str:
+        return self.project._build_repo_url(
+            relative_file_path=Path(self.file_path),
+        )
+
     class Meta:
         ordering = [
             "project",
@@ -252,6 +269,12 @@ class ProjectDoc(models.Model):
         max_length=512,
         help_text=_("Source code path of help file in repository"),
     )
+
+    @property
+    def repo_url(self) -> str:
+        return self.project._build_repo_url(
+            relative_file_path=Path(self.source_path),
+        )
 
     class Meta:
         ordering = [
