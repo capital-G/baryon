@@ -16,7 +16,9 @@
 }
 
 /* see https://stackoverflow.com/a/67480536/3475778 */
-[x-cloak] { display: none !important; }
+[x-cloak] {
+    display: none !important;
+}
 
 
 button {
@@ -24,7 +26,8 @@ button {
     border: none;
 }
 
-h1, h2 {
+h1,
+h2 {
     font-weight: 100;
 }
 
@@ -42,9 +45,12 @@ body {
 }
 
 input {
-    border: none; /* Remove the default input border */
-    border-bottom: 1px solid var(--text-color); /* Add a solid line as the underline */
-    padding: 5px; /* Optional: Add padding for spacing */
+    border: none;
+    /* Remove the default input border */
+    border-bottom: 1px solid var(--text-color);
+    /* Add a solid line as the underline */
+    padding: 5px;
+    /* Optional: Add padding for spacing */
 }
 
 a {
@@ -64,7 +70,7 @@ a:hover {
     background-color: var(--content-bg-color);
     padding: 20px;
     margin-bottom: 40px;
-    box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.75);
     color: var(--text-color);
 }
 
@@ -103,6 +109,13 @@ a:hover {
     flex: 1;
     margin: 0 auto;
     width: 100%;
+}
+
+@media only screen and (max-width: 768px) {
+    .content {
+        margin: 20px;
+        width: auto;
+    }
 }
 
 .content-wrapper {
@@ -183,6 +196,14 @@ a:hover {
     border-bottom: var(--text-color) 1px solid;
 }
 
+@media only screen and (max-width: 768px) {
+    .tab-buttons {
+        overflow-x: auto;
+        width: auto;
+        justify-content: stretch;
+    }
+}
+
 .tab-control {
     padding: 10px 20px;
     width: 100%;
@@ -197,6 +218,12 @@ a:hover {
 .project-content {
     display: grid;
     grid-template-columns: 60% 40%;
+}
+
+@media only screen and (max-width: 768px) {
+    .project-content {
+        grid-template-columns: 1fr;
+    }
 }
 
 .tab-content {
@@ -244,7 +271,7 @@ a:hover {
     width: 100%;
     border: 1px var(--text-color) solid;
     background-color: var(--content-bg-color);
-    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.15);
+    box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.15);
     transition: background-color 0.3s ease;
 }
 
@@ -340,4 +367,10 @@ input.search {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 20px;
+}
+
+@media only screen and (max-width: 768px) {
+    .quarks-list-wrapper {
+        grid-template-columns: 1fr;
+    }
 }
