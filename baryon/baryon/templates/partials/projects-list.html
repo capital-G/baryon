@@ -3,7 +3,7 @@
             <div class="project slot big-slot right-panel">
                 <div class="slot-wrapper">
                     <div class="slot-header">
-                        <a href="{% url "project" name=project.name %}" class="slot-title">{{project.name}}</a>
+                        <a href="{{ project.get_absolute_url }}" class="slot-title">{{project.name}}</a>
                     </div>
                     <div class="slot-content">
                         {{project.quark_info.summary}}
