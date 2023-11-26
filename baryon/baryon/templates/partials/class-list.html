@@ -9,7 +9,7 @@
                         <div>Project</div>
                         <div><a href="{% url 'project' name=class.project.name %}">{{class.name}}</a></div>
                         <div>Source file</div>
-                        <div>{{class.file_path}}</div>
+                        <div><a href="{{ class.repo_url }}">{{class.file_path}}</a></div>
                     </div>
                 </div>
                 <div class="slot-wrapper-right">
