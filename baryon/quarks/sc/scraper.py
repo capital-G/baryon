@@ -85,7 +85,7 @@ class ProjectScraper:
             try:
                 await quark.init_repo()
                 await quark.update_repo()
-                await quark.get_default_branch()
+                project.default_branch = await quark.get_default_branch()
 
                 first_commit = await quark.get_first_commit()
                 project.first_commit = first_commit.date
