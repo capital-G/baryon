@@ -2,6 +2,7 @@ import uuid
 
 from django.db import models
 from django.db.models import Q
+from django.urls import reverse
 from django.utils.translation import gettext as _
 
 
@@ -112,6 +113,9 @@ class Project(models.Model):
         help_text=_("Extracted info from quark file"),
         default=dict,
     )
+
+    def get_absolute_url(self):
+        return reverse("project", kwargs={"name": self.name})
 
     class Meta:
         ordering = ["name"]
@@ -252,6 +256,9 @@ class ProjectDoc(models.Model):
         max_length=512,
         help_text=_("Source code path of help file in repository"),
     )
+
+    def get_absolute_url(self):
+        return self.html_file.url
 
     class Meta:
         ordering = [
