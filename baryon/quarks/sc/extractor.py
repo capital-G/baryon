@@ -389,19 +389,17 @@ class ProjectRepo:
                 num_iters += 1
         raise Exception()
 
+    @staticmethod
     def build_repo_url_for_file(
-        self, file_path: Path, default_branch: Optional[str] = None
+        git_url: str, relative_file_path: Path, default_branch: Optional[str] = None
     ) -> str:
-        # @todo make this static so it can be used by django to build URLs at runtime
-        # so they are not necessary to store in the database
-        base_url = self.url.split("@")[0]
+        base_url = git_url.split("@")[0]
         if base_url.endswith(".git"):
             base_url = base_url[: -len(".git")]
-        default_branch = default_branch if default_branch else self.default_branch
-        relative_file_path = file_path.relative_to(self.repo_path)
+        default_branch = default_branch if default_branch else "main"
         if "github.com" in base_url:
             return f"{base_url}/blob/{default_branch}/{relative_file_path}"
-        elif "gitlab.com" in self.url.lower():
+        elif "gitlab.com" in base_url:
             return f"{base_url}/-/blob/{default_branch}/{relative_file_path}"
         logger.debug("Could not guess URL build pattern of {self} - use gitlab")
         # gitlab as fallback because there are more self hosted gitlab instances than
@@ -478,7 +476,11 @@ class ProjectRepo:
                 # replace link to schelp file
                 for tag in tree.xpath('//div[@class="doclink"]/a'):
                     tag.attrib["href"] = self.build_repo_url_for_file(
-                        help_file.source_path
+                        git_url=self.url,
+                        relative_file_path=help_file.source_path.relative_to(
+                            self.repo_path
+                        ),
+                        default_branch=self.default_branch,
                     )
                     tag.text = str(help_file.source_path.relative_to(self.repo_path))  # type: ignore
 

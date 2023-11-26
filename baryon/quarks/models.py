@@ -1,9 +1,12 @@
 import uuid
+from pathlib import Path
 
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
 from django.utils.translation import gettext as _
+
+from .sc.extractor import ProjectRepo as Extractor
 
 
 class Project(models.Model):
@@ -75,6 +78,12 @@ class Project(models.Model):
         blank=True,
     )
 
+    default_branch = models.CharField(
+        max_length=200,
+        # nowadays it is main but most quarks are a bit older
+        default="master",
+    )
+
     def get_dependencies(self) -> models.QuerySet["Project"]:
         dependencies = []
 
@@ -113,6 +122,13 @@ class Project(models.Model):
         help_text=_("Extracted info from quark file"),
         default=dict,
     )
+
+    def _build_repo_url(self, relative_file_path: Path) -> str:
+        return Extractor.build_repo_url_for_file(
+            git_url=self.git_url,
+            relative_file_path=relative_file_path,
+            default_branch=self.default_branch,
+        )
 
     def get_absolute_url(self):
         return reverse("project", kwargs={"name": self.name})
@@ -214,6 +230,12 @@ class ProjectClass(models.Model):
         null=False, default=False, help_text=_("Is class extension")
     )
 
+    @property
+    def repo_url(self) -> str:
+        return self.project._build_repo_url(
+            relative_file_path=Path(self.file_path),
+        )
+
     class Meta:
         ordering = [
             "project",
@@ -256,6 +278,12 @@ class ProjectDoc(models.Model):
         max_length=512,
         help_text=_("Source code path of help file in repository"),
     )
+
+    @property
+    def repo_url(self) -> str:
+        return self.project._build_repo_url(
+            relative_file_path=Path(self.source_path),
+        )
 
     def get_absolute_url(self):
         return self.html_file.url
