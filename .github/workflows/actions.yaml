@@ -51,7 +51,7 @@ jobs:
         runs-on: ubuntu-latest
         name: test_scraping
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
             - name: Cache Docker images.
               uses: ScribeMD/docker-cache@0.3.6
               with:
