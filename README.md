@@ -1,6 +1,11 @@
 # Baryon
 
-*Baryon* is a package index for SuperCollider extensions, called *quarks*.
+*Baryon* is a package index for SuperCollider plugins, called *quarks* for additions to the standard library (so affecting *sclang*) and *extensions*, which also add new DSP functionality to the server via UGens.
+
+[github.com/supercollider-quarks/quarks](https://github.com/supercollider-quarks/quarks/blob/master/directory.txt) is used as index for Quarks, but as there is no index of extensions, there is a `extensions.yml` which tries to collect.
+This is collected within a file instead of a database as this approach allows for de-centralized contributing as well as no exclusive information is stored in the database.
+
+If you want to add an extension to be tracked via *Baryon*, please make a PR by adding the extension to `./baryon/extensions.yml`.
 
 ## Development
 

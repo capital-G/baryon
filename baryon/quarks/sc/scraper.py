@@ -2,9 +2,10 @@ import asyncio
 import logging
 import re
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import aiohttp
+import yaml
 
 from ..models import Project, ProjectClass, ProjectDoc, ProjectVersion
 from .extractor import ProjectRepo, ProjectType, ReadmeFormatting
@@ -16,6 +17,9 @@ class ProjectScraper:
     QUARKS_TXT_LIST_URL = "https://raw.githubusercontent.com/supercollider-quarks/quarks/master/directory.txt"
     QUARKS_TXT_REGEX = re.compile(
         r"(?P<name>[A-Za-z-_0-9\.]*)=(?P<url>[^@\n]*)@?(?P<tag>.*)"
+    )
+    EXTENSION_YAML_PATH = (
+        Path(__file__).parent.joinpath("../../extensions.yml").resolve()
     )
 
     REPO_PATH = Path(__file__).parent.joinpath("../repos").resolve()
@@ -129,35 +133,39 @@ class ProjectScraper:
 
                 project.quark_info = await quark.extract_quark_info()
 
-                doc_files = await quark.build_docs()
-                quark.fix_doc_links(doc_files)
-                for doc in doc_files:
-                    if doc.html_path is None:
-                        continue
-                    await ProjectDoc.objects.aupdate_or_create(
-                        project=project,
-                        source_path=doc.source_path.relative_to(quark.repo_path),
-                        defaults={
-                            "html_file": str(
-                                doc.html_path.relative_to(
-                                    ProjectRepo.SCDOC_TARGET_PATH.joinpath(
-                                        ".."
-                                    ).resolve()
-                                )
-                            ),
-                        },
-                    )
-            except Exception as e:
+                for help_source_path in quark.find_doc_paths():
+                    doc_files = await quark.build_docs(help_source_path)
+                    quark.fix_doc_links(doc_files)
+                    for doc in doc_files:
+                        if doc.html_path is None:
+                            continue
+                        await ProjectDoc.objects.aupdate_or_create(
+                            project=project,
+                            source_path=doc.source_path.relative_to(quark.repo_path),
+                            defaults={
+                                "html_file": str(
+                                    doc.html_path.relative_to(
+                                        ProjectRepo.SCDOC_TARGET_PATH.joinpath(
+                                            ".."
+                                        ).resolve()
+                                    )
+                                ),
+                            },
+                        )
+            except TimeoutError as e:
                 logger.error(f"Found error on {quark}: {e}")
             finally:
                 await project.asave()
                 self.queue.task_done()
                 logger.info(f"Finished working on {quark}")
 
-    async def scrape_quarks(self):
+    async def scrape_quarks(self, limit: Optional[int] = None):
         logger.info(f"Start scraping quarks with {self.num_instances} instances")
 
-        for quark_entry in await self._fetch_quark_repos():
+        for quark_num, quark_entry in enumerate(await self._fetch_quark_repos()):
+            if limit:
+                if quark_num >= limit:
+                    break
             await self.queue.put(quark_entry)
 
         # Create worker tasks to process the queue concurrently.
@@ -175,24 +183,47 @@ class ProjectScraper:
         # wait for shutdown of workers
         await asyncio.gather(*workers)
 
+    async def _fetch_extensions(self) -> List[ProjectRepo]:
+        with open(self.EXTENSION_YAML_PATH, "r") as f:
+            extensions_yaml: Dict = yaml.safe_load(f)
+        extensions: List[ProjectRepo] = []
+        raw_extensions = extensions_yaml.get("extensions", [])
+        for raw_extension in raw_extensions:
+            try:
+                extensions.append(
+                    ProjectRepo(
+                        project_type=ProjectType.EXTENSION,
+                        repo_path=self.REPO_PATH.joinpath(raw_extension["name"]),
+                        sclang_path=Path(
+                            "/Applications/SuperCollider.app/Contents/MacOS/sclang"
+                        ),
+                        **raw_extension,
+                    )
+                )
+            except Exception as e:
+                print(e)
+        return extensions
 
-async def foo():
-    project = ProjectRepo(
-        project_type=ProjectType.QUARK,
-        name="atk-sc3",
-        url="https://github.com/vitreo12/AlgaLib.git",
-        repo_path=Path("/Users/scheiba/github/sc-quarks/baryon/repos/atk-sc3"),
-        default_tag=None,
-    )
-    await project.init_repo()
+    async def scrape_extensions(self, limit: Optional[int] = None):
+        logger.info(f"Start scraping quarks with {self.num_instances} instances")
 
-    print(await project.get_git_tags())
+        for num, extension_entry in enumerate(await self._fetch_extensions()):
+            if limit:
+                if num >= limit:
+                    break
+            await self.queue.put(extension_entry)
 
-    print(project.get_readme())
-    print(await project.extract_quark_info())
-    print("Found classes", [x.name for x in project.get_classes()])
-    print(await project.build_docs())
+        # Create worker tasks to process the queue concurrently.
+        workers = [
+            asyncio.create_task(self._worker(i)) for i in range(self.num_instances)
+        ]
 
+        # Wait until the queue is empty
+        await self.queue.join()
 
-if __name__ == "__main__":
-    asyncio.run(foo())
+        # Put None in the queue to signal workers to stop
+        for _ in range(self.num_instances):
+            await self.queue.put(None)
+
+        # wait for shutdown of workers
+        await asyncio.gather(*workers)
