@@ -11,13 +11,23 @@ from .models import Project, ProjectClass
 
 def index(request: HttpRequest):
     num_of_quarks = 5
+    quark_qs = Project.objects.filter(project_type=Project.ProjectType.QUARK)
+    extension_qs = Project.objects.filter(project_type=Project.ProjectType.EXTENSION)
+
     return render(
         request,
         "index.html",
         context={
-            "random_quarks": Project.objects.order_by("?")[0:num_of_quarks],
-            "latest_quarks": Project.objects.order_by("-first_commit")[0:num_of_quarks],
-            "latest_updates": Project.objects.order_by("-latest_commit")[
+            "random_quarks": quark_qs.order_by("?")[0:num_of_quarks],
+            "latest_quarks": quark_qs.order_by("-first_commit")[0:num_of_quarks],
+            "latest_quark_updates": quark_qs.order_by("-latest_commit")[
+                0:num_of_quarks
+            ],
+            "random_extensions": extension_qs.order_by("?")[0:num_of_quarks],
+            "latest_extensions": extension_qs.order_by("-first_commit")[
+                0:num_of_quarks
+            ],
+            "latest_extension_updates": extension_qs.order_by("-latest_commit")[
                 0:num_of_quarks
             ],
         },

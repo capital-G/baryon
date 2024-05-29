@@ -57,7 +57,7 @@ jobs:
               with:
                 key: docker-${{ runner.os }}-${{ hashFiles('Dockerfile') }}
             - run: docker build -t baryon .
-            - run: docker run --env DJANGO_SETTINGS_MODULE=baryon.settings.dev baryon /bin/bash -c "python manage.py migrate && python manage.py scrape_quarks"
+            - run: docker run --env DJANGO_SETTINGS_MODULE=baryon.settings.dev baryon /bin/bash -c "python manage.py migrate && python manage.py scrape_projects"
 
     deploy:
         if: success() && github.ref == 'refs/heads/main' # only deploy main

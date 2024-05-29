@@ -1,0 +1,31 @@
+extensions:
+  - name: CDSkip
+    url: https://github.com/nhthn/supercollider-cd-skip
+    download_url: https://github.com/nhthn/supercollider-cd-skip/releases
+  - name: FluCoMa
+    url: https://github.com/flucoma/flucoma-sc
+    download_url: https://github.com/flucoma/flucoma-sc/releases
+  - name: sc3-plugins
+    url: https://github.com/supercollider/sc3-plugins
+    download_url: https://github.com/supercollider/sc3-plugins/releases
+    src_path_patterns:
+      - source/**/sc
+  - name: guttersynth-sc
+    url: https://github.com/madskjeldgaard/guttersynth-sc
+  - name: steroids-ugens
+    url: https://github.com/tai-studio/steroids-ugens
+  - name: MDUgens
+    url: https://github.com/michaeldzjap/MDUGens
+  - name: ScPy
+    url: https://github.com/nwoeanhinnogaehr/ScPy
+  - name: sc-modeledmodules
+    url: https://github.com/intothebeans/sc-modeledmodules
+  - name: mi-UGens
+    url: https://github.com/v7b1/mi-UGens
+    download_url: https://github.com/v7b1/mi-UGens/releases
+  - name: portedplugins
+    url: https://github.com/madskjeldgaard/portedplugins
+  - name: MyUGens
+    url: https://github.com/sonoro1234/MyUGens
+  - name: DWGReverb
+    url: https://github.com/sonoro1234/DWGReverb

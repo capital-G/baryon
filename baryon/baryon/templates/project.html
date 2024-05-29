@@ -58,22 +58,24 @@
         </div>
 
         <div class="project-quark-info">
-            <h3>Installation</h3>
-            <button class="installation-code" onclick="copyToClipboard()">
-                <span id="installation-code-text">
-Quarks.install("{{project.git_url}}");
-thisProcess.recompile;
-                </span>
-            </button>
+            {% if project.project_type == "quark" %}
+                <h3>Installation</h3>
+                <button class="installation-code" onclick="copyToClipboard()">
+                    <span id="installation-code-text">
+    Quarks.install("{{project.git_url}}");
+    thisProcess.recompile;
+                    </span>
+                </button>
 
-            <script>
-                // from https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
-                function copyToClipboard() {
-                    var installationCode = document.getElementById("installation-code-text");
-                    navigator.clipboard.writeText(`(\n${installationCode.textContent.trim()}\n)`);
-                    alert("Copied installation code to clipboard");
-                }
-            </script>
+                <script>
+                    // from https://www.w3schools.com/howto/howto_js_copy_clipboard.asp
+                    function copyToClipboard() {
+                        var installationCode = document.getElementById("installation-code-text");
+                        navigator.clipboard.writeText(`(\n${installationCode.textContent.trim()}\n)`);
+                        alert("Copied installation code to clipboard");
+                    }
+                </script>
+            {% endif %}
 
             <h3>Repository</h3>
             <div class="quark-table">

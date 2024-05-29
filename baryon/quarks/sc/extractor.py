@@ -8,6 +8,7 @@ import re
 import shutil
 import tempfile
 from asyncio.subprocess import PIPE
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -20,6 +21,10 @@ logger = logging.getLogger(__name__)
 
 
 class RepoUnavailable(Exception):
+    pass
+
+
+class SclangError(Exception):
     pass
 
 
@@ -48,6 +53,12 @@ class ReadmeFormatting(enum.Enum):
     MARKDOWN = ".md"
     RAW = ""
     TXT = ".txt"
+
+
+@dataclass
+class ReadmeCandidate:
+    file_path: Path
+    formatting: ReadmeFormatting
 
 
 @dataclasses.dataclass
@@ -99,9 +110,11 @@ class ProjectRepo:
         name: str,
         url: str,
         repo_path: Path,
-        default_tag: Optional[str],
+        default_tag: Optional[str] = None,
         default_branch: str = "main",
-        sclang_path: Optional[str] = None,
+        sclang_path: Optional[Path] = None,
+        src_path_patterns: Optional[List[str]] = None,
+        download_path: Optional[str] = None,
     ) -> None:
         self.project_type = project_type
         self.name = name
@@ -117,6 +130,9 @@ class ProjectRepo:
             sclang_path if sclang_path else os.environ.get("SCLANG_PATH", "sclang")
         )
         assert self.SCLANG_PATH is not None
+
+        self.src_path_patterns = src_path_patterns or [""]
+        self.download_path = download_path
 
     @classmethod
     async def new_repo(cls, **kwargs):
@@ -226,8 +242,7 @@ class ProjectRepo:
         return text
 
     def get_readme(self) -> Optional[Readme]:
-        readme_candidates: List[Path] = []
-        readme_type: ReadmeFormatting = ReadmeFormatting.MARKDOWN
+        readme_candidates: List[ReadmeCandidate] = []
         # list is used as a priority search
         for ext in [
             ReadmeFormatting.MARKDOWN,
@@ -241,20 +256,25 @@ class ProjectRepo:
             for folder, _, file_names in os.walk(self.repo_path):
                 for file_name in file_names:
                     if file_name.lower() == f"readme{ext.value.lower()}":
-                        readme_candidates.append(Path(folder).joinpath(file_name))
-                        readme_type = ext
+                        readme_candidates.append(
+                            ReadmeCandidate(
+                                file_path=Path(folder).joinpath(file_name),
+                                formatting=ext,
+                            )
+                        )
+                        # stop on first occasion of a readme candidate
                         break
 
         if len(readme_candidates) == 0:
             logger.info(f"Could not find a README file for {self}")
             return None
 
-        readme_file_path = readme_candidates[0]
+        readme_candidate = readme_candidates[0]
         try:
             return Readme(
-                file_path=readme_file_path,
-                formatting=readme_type,
-                text=self._get_file_contents(readme_file_path),
+                file_path=readme_candidate.file_path,
+                formatting=readme_candidate.formatting,
+                text=self._get_file_contents(readme_candidate.file_path),
             )
         except Exception as e:
             logger.error(f"Failed to fetch README for {self}: {e}")
@@ -288,7 +308,7 @@ class ProjectRepo:
             # exception!
         stdout, stderr = await task
         if stderr:
-            logger.error(f"Stderr on {cmd}: {stderr.decode()}")
+            raise SclangError(stderr.decode())
         # assert git_process.returncode == 0
         return stdout.decode()
 
@@ -303,22 +323,42 @@ class ProjectRepo:
         with tempfile.NamedTemporaryFile(
             "r", suffix=f"_sc_quark_{self.name}.json"
         ) as f:
-            quark_info_cmd = await self._sclang(
-                str(Path(__file__).parent.joinpath("quarkToJson.scd").resolve()),
-                env={
-                    "QUARK_FILE": str(quark_file_path.absolute()),
-                    "QUARK_JSON_FILE": f.name,
-                },
-            )
+            try:
+                quark_info_cmd = await self._sclang(
+                    str(Path(__file__).parent.joinpath("quarkToJson.scd").resolve()),
+                    env={
+                        "QUARK_FILE": str(quark_file_path.absolute()),
+                        "QUARK_JSON_FILE": f.name,
+                    },
+                )
+            except SclangError as e:
+                logger.error(f"Could not extract quark info via sclang: {e}")
+                return {}
             j = json.load(f)
 
         return j
 
-    async def build_docs(self) -> List[HelpFile]:
-        help_source_path = self.repo_path
-        if self.repo_path.joinpath("HelpSource").exists():
-            help_source_path = help_source_path.joinpath("HelpSource")
+    def find_doc_paths(self, include_main_path_as_fallback: bool = True) -> List[Path]:
+        """Finds all directories matching "HelpSource" within a main directory.
+        This is necessary because sc3-plugins contains multiple extensions and
+        therefore also multiple HelpSource directories.
 
+        .. todo::
+
+            search for folders containing `.schelp` files
+        """
+        help_source_paths: List[Path] = []
+        for folder, dir_names, _ in os.walk(self.repo_path):
+            for dir_name in dir_names:
+                if dir_name.lower() == "helpsource":
+                    help_source_paths.append(Path(folder).joinpath(dir_name))
+
+        if include_main_path_as_fallback and len(help_source_paths) == 0:
+            help_source_paths.append(self.repo_path)
+
+        return help_source_paths
+
+    async def build_docs(self, help_source_path: Path) -> List[HelpFile]:
         # in order to create a namespace for the docs (so classes with the same name do not clash)
         # it is necessary to create a directory which wraps the schelp files
         # in order to be more stateless this is a temp dir which deletes after the execution
@@ -328,24 +368,27 @@ class ProjectRepo:
         with tempfile.TemporaryDirectory(f"baryon_{self.name}") as temp_dir:
             temp_path = Path(temp_dir)
             shutil.copytree(help_source_path, temp_path.joinpath(self.name))
-
-            quark_info_cmd = await self._sclang(
-                str(Path(__file__).parent.joinpath("buildDocs.scd").resolve()),
-                env={
-                    # parent to create an additional layer for the namespace :)
-                    "QUARK_HELP_SOURCE_PATH": str(temp_path),
-                    # "QUARK_HELP_SOURCE_FILES": ",".join([str(x.relative_to(namespace_help_source_path.parent)) for x in help_file_paths]),
-                    "QUARK_HELP_TARGET_PATH": str(self.SCDOC_TARGET_PATH.absolute()),
-                },
-            )
+            try:
+                quark_info_cmd = await self._sclang(
+                    str(Path(__file__).parent.joinpath("buildDocs.scd").resolve()),
+                    env={
+                        # parent to create an additional layer for the namespace :)
+                        "QUARK_HELP_SOURCE_PATH": str(temp_path),
+                        # "QUARK_HELP_SOURCE_FILES": ",".join([str(x.relative_to(namespace_help_source_path.parent)) for x in help_file_paths]),
+                        "QUARK_HELP_TARGET_PATH": str(
+                            self.SCDOC_TARGET_PATH.absolute()
+                        ),
+                    },
+                )
+            except SclangError as e:
+                logger.error(f"Sclang error on building docs for {self.name}: {e}")
+                return []
 
             logger.debug(f"Doc build log for {self}: {quark_info_cmd}")
 
         help_files: List[HelpFile] = []
         doc_name_space_dir = self.SCDOC_TARGET_PATH.joinpath(self.name)
         for dir_name, _, filenames in os.walk(doc_name_space_dir):
-            Path(dir_name)
-            # html_path = self.SCDOC_TARGET_PATH.joinpath(help_file_path.relative_to(namespace_help_source_path.parent).with_suffix(".html"))
             for filename in filenames:
                 # only index html files
                 if not filename.endswith(".html"):
@@ -359,9 +402,13 @@ class ProjectRepo:
                 source_file_path = help_source_path.joinpath(
                     Path(str(relative_path).replace(".html", ".schelp"))
                 )
-                assert (
-                    source_file_path.is_file()
-                )  # every html file needs to origin in a sc help file
+
+                # because there can be multiple HelpSource dirs within one repo
+                # we need to build it multiple times - in this case we may
+                # observe HTML files from a previous build which do not match
+                # a schelp file, therefore we just skip those examples
+                if not source_file_path.is_file():
+                    continue
 
                 help_files.append(
                     HelpFile(source_path=source_file_path, html_path=html_file)
@@ -474,6 +521,7 @@ class ProjectRepo:
                             tag.attrib["href"] = url
 
                 # replace link to schelp file
+                # @todo this does not work as intended
                 for tag in tree.xpath('//div[@class="doclink"]/a'):
                     tag.attrib["href"] = self.build_repo_url_for_file(
                         git_url=self.url,
@@ -538,7 +586,7 @@ async def foo():
         url="https://github.com/vitreo12/AlgaLib.git",
         repo_path=Path("/Users/scheiba/github/sc-quarks/baryon/repos/AlgaLib"),
         default_tag=None,
-        sclang_path="/Applications/SuperCollider.app/Contents/MacOS/sclang",
+        sclang_path=Path("/Applications/SuperCollider.app/Contents/MacOS/sclang"),
     )
     await project.init_repo()
     await project.get_default_branch()

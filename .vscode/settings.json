@@ -1,5 +1,8 @@
 {
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.extraPaths": ["baryon"],
-    "mypy-type-checker.cwd": "${workspaceFolder}/baryon"
+    "mypy-type-checker.cwd": "${workspaceFolder}/baryon",
+    "cSpell.words": [
+        "Sclang"
+    ]
 }
