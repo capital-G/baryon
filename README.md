@@ -62,7 +62,7 @@ Use [certbot](https://certbot.eff.org/) to obtain a SSL certificate for the webs
 As the scraping needs to run in regular intervals it is necessary to create a reoccurring job which executes the [Django command](https://docs.djangoproject.com/en/dev/howto/custom-management-commands/)
 
 ```shell
-python manage.py scrape_quarks
+python manage.py scrape_projects
 ```
 
 within the Docker container `backend`.
