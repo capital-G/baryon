@@ -16,16 +16,14 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            "-e",
-            "--no-extensions",
-            action="store_false",
+            "--skip-extensions",
+            action="store_true",
             help="Omit extension scraping",
         )
 
         parser.add_argument(
-            "-q",
-            "--no-quarks",
-            action="store_false",
+            "--skip-quarks",
+            action="store_true",
             help="Omit quark scraping",
         )
 
@@ -38,8 +36,9 @@ class Command(BaseCommand):
         await scraper.scrape_quarks(limit)
 
     def handle(self, *args, **options):
-        if options.get("--no-extensions", True):
+        print(options)
+        if not options["skip_extensions"]:
             asyncio.run(self.scrape_extensions(limit=options.get("limit")))
 
-        if options.get("--no-quarks", True):
+        if not options["skip_quarks"]:
             asyncio.run(self.scrape_quarks(limit=options.get("limit")))
