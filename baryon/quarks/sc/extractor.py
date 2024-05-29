@@ -577,32 +577,3 @@ class ProjectRepo:
 
     def __str__(self) -> str:
         return f"{self.name} ({self.url})"
-
-
-async def foo():
-    project = ProjectRepo(
-        project_type=ProjectType.QUARK,
-        name="AlgaLib",
-        url="https://github.com/vitreo12/AlgaLib.git",
-        repo_path=Path("/Users/scheiba/github/sc-quarks/baryon/repos/AlgaLib"),
-        default_tag=None,
-        sclang_path=Path("/Applications/SuperCollider.app/Contents/MacOS/sclang"),
-    )
-    await project.init_repo()
-    await project.get_default_branch()
-
-    print(await project.get_first_commit())
-
-    # print(await project.get_git_tags())
-
-    # print(project.get_readme())
-    # print(await project.extract_quark_info())
-    # classes = project.get_classes()
-    # # print("Found classes", [x.name for x in project.get_classes()])
-    docs = await project.build_docs()
-    project.fix_doc_links(docs)
-    print("foo")
-
-
-if __name__ == "__main__":
-    asyncio.run(foo())
