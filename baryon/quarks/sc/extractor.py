@@ -115,6 +115,7 @@ class ProjectRepo:
         sclang_path: Optional[Path] = None,
         src_path_patterns: Optional[List[str]] = None,
         download_path: Optional[str] = None,
+        **kwargs,
     ) -> None:
         self.project_type = project_type
         self.name = name
