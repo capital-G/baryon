@@ -194,9 +194,6 @@ class ProjectScraper:
                     ProjectRepo(
                         project_type=ProjectType.EXTENSION,
                         repo_path=self.REPO_PATH.joinpath(raw_extension["name"]),
-                        sclang_path=Path(
-                            "/Applications/SuperCollider.app/Contents/MacOS/sclang"
-                        ),
                         **raw_extension,
                     )
                 )
