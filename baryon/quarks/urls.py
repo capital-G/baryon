@@ -8,7 +8,6 @@ urlpatterns = [
     path("quarks", views.QuarksListView.as_view(), name="quarks"),
     path("extensions", views.ExtensionListView.as_view(), name="extensions"),
     path("classes", views.ClassesListView.as_view(), name="classes"),
-    path("docs", views.DocsListView.as_view(), name="docs"),
     path("about", cache_page(1)(views.AboutView.as_view()), name="about"),
     # cache this as this has dependencies scanning
     path(
