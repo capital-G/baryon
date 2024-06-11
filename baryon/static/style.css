@@ -81,11 +81,22 @@ a:hover {
     justify-content: space-between;
 }
 
-#header p.title {
+#header span.title {
     font-size: 1.2rem;
     font-weight: 10;
     color: var(--accent-color);
     padding-left: 20px;
+}
+
+#header a.logo-container {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+#header img.baryon-logo {
+    height: 100%;
+    max-height: 35px;
 }
 
 .highlight {
@@ -96,6 +107,7 @@ a:hover {
     display: flex;
     flex-direction: row;
     justify-content: end;
+    align-items: center;
 }
 
 #header ul {
