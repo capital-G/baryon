@@ -189,6 +189,7 @@ a:hover {
     align-items: center;
     border: #000 1px solid;
     padding: 20px;
+    -webkit-backdrop-filter: var(--background-blur);
     backdrop-filter: var(--background-blur);
 }
 
@@ -285,6 +286,7 @@ a:hover {
 .slot {
     width: 100%;
     border: 1px var(--text-color) solid;
+    -webkit-backdrop-filter: var(--background-blur);
     backdrop-filter: var(--background-blur);
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.15);
     transition: background-color 0.3s ease;
