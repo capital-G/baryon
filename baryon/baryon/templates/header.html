@@ -1,6 +1,11 @@
+{% load static %}
+
 <div id="header">
     <div id="header-content">
-        <a href="{% url 'index' %}"><p class="title">Baryon</p></a>
+        <a href="{% url 'index' %}" class="logo-container">
+            <img class="baryon-logo" src="{% static 'logo.png' %}" alt="Baryon logo" />
+            <span class="title">Baryon</span>
+        </a>
         <div id="header-menu">
             <ul>
                 <a href="{% url 'quarks' %}">Quarks</a>

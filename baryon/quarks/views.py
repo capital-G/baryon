@@ -2,40 +2,43 @@ from typing import Any, List
 
 from django.db.models import Q
 from django.db.models.query import QuerySet
-from django.http import HttpRequest
-from django.shortcuts import render
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, TemplateView
 
 from .models import Project, ProjectClass
 
 
-def index(request: HttpRequest):
+class IndexView(TemplateView):
+    template_name = "index.html"
     num_of_quarks = 5
     quark_qs = Project.objects.filter(project_type=Project.ProjectType.QUARK)
     extension_qs = Project.objects.filter(project_type=Project.ProjectType.EXTENSION)
 
-    return render(
-        request,
-        "index.html",
-        context={
-            "random_quarks": quark_qs.order_by("?")[0:num_of_quarks],
-            "latest_quarks": quark_qs.order_by("-first_commit")[0:num_of_quarks],
-            "latest_quark_updates": quark_qs.order_by("-latest_commit")[
-                0:num_of_quarks
-            ],
-            "random_extensions": extension_qs.order_by("?")[0:num_of_quarks],
-            "latest_extensions": extension_qs.order_by("-first_commit")[
-                0:num_of_quarks
-            ],
-            "latest_extension_updates": extension_qs.order_by("-latest_commit")[
-                0:num_of_quarks
-            ],
-        },
-    )
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+
+        context["random_quarks"] = self.quark_qs.order_by("?")[0 : self.num_of_quarks]
+        context["latest_quarks"] = self.quark_qs.order_by("-first_commit")[
+            0 : self.num_of_quarks
+        ]
+        context["latest_quark_updates"] = self.quark_qs.order_by("-latest_commit")[
+            0 : self.num_of_quarks
+        ]
+
+        context["random_extensions"] = self.extension_qs.order_by("?")[
+            0 : self.num_of_quarks
+        ]
+        context["latest_extensions"] = self.extension_qs.order_by("-first_commit")[
+            0 : self.num_of_quarks
+        ]
+        context["latest_extension_updates"] = self.extension_qs.order_by(
+            "-latest_commit"
+        )[0 : self.num_of_quarks]
+
+        return context
 
 
-def about(request: HttpRequest):
-    return render(request, "about.html")
+class AboutView(TemplateView):
+    template_name = "about.html"
 
 
 class ClassesListView(ListView):

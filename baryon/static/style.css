@@ -7,6 +7,7 @@
     --text-color-lighter: #333;
     --text-color-lightest: #999;
     --accent-color: #f0f;
+    --background-blur: blur(3px);
 }
 
 * {
@@ -68,10 +69,11 @@ a:hover {
     position: sticky;
     top: 0;
     background-color: var(--content-bg-color);
-    padding: 20px;
+    padding: 15px 20px;
     margin-bottom: 40px;
     box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.75);
     color: var(--text-color);
+    z-index: 100;
 }
 
 #header-content {
@@ -81,11 +83,22 @@ a:hover {
     justify-content: space-between;
 }
 
-#header p.title {
+#header span.title {
     font-size: 1.2rem;
     font-weight: 10;
     color: var(--accent-color);
     padding-left: 20px;
+}
+
+#header a.logo-container {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+#header img.baryon-logo {
+    height: 100%;
+    max-height: 35px;
 }
 
 .highlight {
@@ -96,6 +109,7 @@ a:hover {
     display: flex;
     flex-direction: row;
     justify-content: end;
+    align-items: center;
 }
 
 #header ul {
@@ -175,6 +189,8 @@ a:hover {
     align-items: center;
     border: #000 1px solid;
     padding: 20px;
+    -webkit-backdrop-filter: var(--background-blur);
+    backdrop-filter: var(--background-blur);
 }
 
 /* project */
@@ -270,7 +286,8 @@ a:hover {
 .slot {
     width: 100%;
     border: 1px var(--text-color) solid;
-    background-color: var(--content-bg-color);
+    -webkit-backdrop-filter: var(--background-blur);
+    backdrop-filter: var(--background-blur);
     box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.15);
     transition: background-color 0.3s ease;
 }
