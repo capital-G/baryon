@@ -238,9 +238,9 @@ class ProjectClass(models.Model):
 
     class Meta:
         ordering = [
+            "name",
             "project",
             "is_extension",
-            "name",
         ]
 
     def __str__(self) -> str:
