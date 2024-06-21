@@ -29,3 +29,6 @@ extensions:
     url: https://github.com/sonoro1234/MyUGens
   - name: DWGReverb
     url: https://github.com/sonoro1234/DWGReverb
+  - name: vstplugin
+    url: https://git.iem.at/pd/vstplugin.git
+    download_url: https://git.iem.at/pd/vstplugin/-/releases
