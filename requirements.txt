@@ -11,4 +11,4 @@ uvicorn==0.29.0
 psycopg2-binary==2.9.9
 lxml==5.2.2
 unittest-xml-reporting==3.2.0
-pyyaml==6.0.1
+pyyaml==6.0.2
