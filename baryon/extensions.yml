@@ -32,3 +32,6 @@ extensions:
   - name: vstplugin
     url: https://git.iem.at/pd/vstplugin.git
     download_url: https://git.iem.at/pd/vstplugin/-/releases
+  - name: sc3-rdu
+    url: https://github.com/rd--/sc3-rdu
+    download_url: https://github.com/rd--/sc3-rdu/releases
